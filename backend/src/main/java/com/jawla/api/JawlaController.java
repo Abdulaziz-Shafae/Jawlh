@@ -12,7 +12,7 @@ import java.util.*;
  private final StoreRepository stores; private final ReviewRepository reviews; private final MemberService members; private final StoreImageRepository images; private final StoreImageService storeImageService;
  public JawlaController(StoreRepository s,ReviewRepository r,MemberService m,StoreImageRepository images,StoreImageService storeImageService){stores=s;reviews=r;members=m;this.images=images;this.storeImageService=storeImageService;}
  public record JoinInput(@NotBlank String name){}
- public record StoreInput(@NotBlank String name,String instagramUrl,String mapsUrl,String imageUrl,String websiteUrl,String city,String categories,Double latitude,Double longitude){}
+ public record StoreInput(@NotBlank String name,String instagramUrl,String mapsUrl,@Size(max=8192) String imageUrl,String websiteUrl,String city,String categories,Double latitude,Double longitude){}
  public record ReviewInput(@Min(1) @Max(5) int stars,String note){}
  public record StatusInput(String status){}
  @PostMapping("/members") public Object join(@Valid @RequestBody JoinInput input){return members.join(input.name());}
