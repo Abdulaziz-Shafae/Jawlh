@@ -40,18 +40,33 @@ public class StoreImageService {
             String html = response.body();
             if (html.length() > 500000) html = html.substring(0, 500000);
             Matcher matcher = META.matcher(html);
+            List<String> candidates = new ArrayList<>();
+            List<Integer> widths = new ArrayList<>();
             while (matcher.find()) {
                 Map<String,String> attrs = new HashMap<>();
-                Matcher a = ATTR.matcher(matcher.group());
-                while (a.find()) attrs.put(a.group(1).toLowerCase(), a.group(3));
+                Matcher attribute = ATTR.matcher(matcher.group());
+                while (attribute.find()) attrs.put(attribute.group(1).toLowerCase(), attribute.group(3));
                 String property = attrs.getOrDefault("property", attrs.getOrDefault("name", "")).toLowerCase();
-                if (!Set.of("og:image", "og:image:url", "twitter:image").contains(property)) continue;
                 String value = attrs.getOrDefault("content", "").replace("&amp;", "&");
+                if ("og:image:width".equals(property) && !widths.isEmpty()) {
+                    try {widths.set(widths.size()-1,Integer.parseInt(value.trim()));} catch (NumberFormatException ignored) {}
+                    continue;
+                }
+                if (!Set.of("og:image", "og:image:url", "twitter:image").contains(property)) continue;
                 try {
                     URI picture = uri.resolve(value);
-                    if ("https".equalsIgnoreCase(picture.getScheme()) && picture.getHost() != null && picture.getUserInfo() == null && picture.getPort() == -1 && !isUnsafeHost(picture.getHost())) return picture.toString();
+                    if ("https".equalsIgnoreCase(picture.getScheme()) && picture.getHost() != null && picture.getUserInfo() == null && picture.getPort() == -1 && picture.toString().length()<=8192 && !isUnsafeHost(picture.getHost())) {
+                        candidates.add(picture.toString());
+                        widths.add(0);
+                    }
                 } catch (Exception ignored) {}
             }
+            int best = -1;
+            for (int i=0;i<candidates.size();i++) {
+                if (widths.get(i)>0 && widths.get(i)<600) continue;
+                if (best<0 || widths.get(i)>widths.get(best)) best=i;
+            }
+            if (best>=0) return candidates.get(best);
         } catch (Exception ignored) {}
         return "";
     }
