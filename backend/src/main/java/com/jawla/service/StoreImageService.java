@@ -32,6 +32,7 @@ public class StoreImageService {
 
     private String findPublicPreview(String url, boolean instagram) {
         URI uri = validateWebsiteUrl(url, instagram);
+        if (instagram) uri = URI.create("https://www.instagram.com" + (uri.getRawPath() == null || uri.getRawPath().isBlank() ? "/" : uri.getRawPath()));
         try {
             HttpRequest request = HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(10)).header("Accept", "text/html").header("User-Agent", "Mozilla/5.0").GET().build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
