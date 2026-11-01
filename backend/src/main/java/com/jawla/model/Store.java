@@ -6,7 +6,7 @@ import java.time.Instant;
  @Column(nullable=false,length=150) public String name;
  @Column(length=500) public String instagramUrl;
  @Column(columnDefinition="TEXT") public String mapsUrl;
- @Column(length=500) public String imageUrl;
+ @Column(columnDefinition="TEXT") public String imageUrl;
  @Column(length=500) public String websiteUrl;
  @Column(length=150) public String city;
  @Column(length=500) public String categories;
